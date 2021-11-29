@@ -79,4 +79,9 @@ public class Program implements AssignmentInterface {
 				+ "\ndue date = " + dueDate
 				+ "\nconcept = " + concept);
 	}
+
+	@Override
+	public String getAssignmentType() {
+		return "Program";
+	}
 }

@@ -79,4 +79,9 @@ public class Discussion implements AssignmentInterface{
 				+ "\ndue date = " + dueDate
 				+ "\nassociated reading = " + reading);
 	}
+
+	@Override
+	public String getAssignmentType() {
+		return "Discussion";
+	}
 }

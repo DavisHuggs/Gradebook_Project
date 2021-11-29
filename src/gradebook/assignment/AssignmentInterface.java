@@ -18,6 +18,7 @@ public interface AssignmentInterface {
 	public abstract char getLetter();
 	public abstract String getName();
 	public abstract LocalDate getDueDate();
+	public abstract String getAssignmentType();
 	
 	//setters for assignments
 	public abstract void setScore(double score);

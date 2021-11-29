@@ -79,4 +79,9 @@ public class Quiz implements AssignmentInterface{
 				+ "\ndue date = " + dueDate
 				+ "\nnumber of questions = " + numQuestions);
 	}
+
+	@Override
+	public String getAssignmentType() {
+		return "Quiz";
+	}
 }

@@ -6,11 +6,16 @@ package gradebook.ui;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 import gradebook.assignment.*;
 import gradebook.io.*;
+import gradebook.db.*;
 
 public class Gradebook {
 	/*
@@ -159,13 +164,136 @@ public class Gradebook {
 		
 		return index;
 	}
+	/*
+	 * Sorts arraylist by score
+	 */
+	public static ArrayList<AssignmentInterface> sortByScore(ArrayList<AssignmentInterface> arr){
+		ArrayList<AssignmentInterface> temp = new ArrayList<>();
+		temp = (ArrayList<AssignmentInterface>) arr.clone();
+		ArrayList<AssignmentInterface> sortedArr = new ArrayList<>();
+		
+		while(sortedArr.size() != arr.size() && temp.isEmpty() == false) {
+			int index = 0;
+			int score = (int) temp.get(0).getScore();
+			
+			for(int i = 0; i < temp.size(); i++) {
+				if(score < temp.get(i).getScore()) {
+					score = (int) temp.get(i).getScore();
+					index = i;
+				}
+			}
+			sortedArr.add(temp.get(index));
+			temp.remove(index);
+		}
+		
+		return sortedArr;
+	}
+	/*
+	 * Sorts arraylist by letter
+	 */
+	public static ArrayList<AssignmentInterface> sortByLetter(ArrayList<AssignmentInterface> arr){
+		ArrayList<AssignmentInterface> temp = new ArrayList<>();
+		temp = (ArrayList<AssignmentInterface>) arr.clone();
+		ArrayList<AssignmentInterface> sortedArr = new ArrayList<>();
+		
+		while(sortedArr.size() != arr.size() && temp.isEmpty() == false) {
+			int index = 0;
+			char letter = (char) temp.get(0).getLetter();
+			
+			for(int i = 0; i < temp.size(); i++) {
+				if(letter < temp.get(i).getLetter()) {
+					letter = (char) temp.get(i).getLetter();
+					index = i;
+				}
+			}
+			sortedArr.add(temp.get(index));
+			temp.remove(index);
+		}
+		
+		Collections.reverse(sortedArr);
+		
+		return sortedArr;
+	}
+	/*
+	 * Sorts arraylist by alphabetical names
+	 */
+	public static ArrayList<AssignmentInterface> sortByAlph(ArrayList<AssignmentInterface> arr){
+		ArrayList<AssignmentInterface> temp = new ArrayList<>();
+		temp = (ArrayList<AssignmentInterface>) arr.clone();
+		ArrayList<AssignmentInterface> sortedArr = new ArrayList<>();
+		
+		while(sortedArr.size() != arr.size() && temp.isEmpty() == false) {
+			int index = 0;
+			String name = (String) temp.get(0).getName();
+			
+			for(int i = 0; i < temp.size(); i++) {
+				if(name.compareTo((String) temp.get(i).getName()) > 0) {
+					name = (String) temp.get(i).getName();
+					index = i;
+				}
+			}
+			sortedArr.add(temp.get(index));
+			temp.remove(index);
+		}
+		
+		return sortedArr;
+	}
+	/*
+	 * Sorts arraylist by date
+	 */
+	public static ArrayList<AssignmentInterface> sortByDate(ArrayList<AssignmentInterface> arr){
+		ArrayList<AssignmentInterface> temp = new ArrayList<>();
+		temp = (ArrayList<AssignmentInterface>) arr.clone();
+		ArrayList<AssignmentInterface> sortedArr = new ArrayList<>();
+		
+		while(sortedArr.size() != arr.size() && temp.isEmpty() == false) {
+			int index = 0;
+			LocalDate date = (LocalDate) temp.get(0).getDueDate();
+			
+			for(int i = 0; i < temp.size(); i++) {
+				if(date.isBefore(temp.get(i).getDueDate())) {
+					date = (LocalDate) temp.get(i).getDueDate();
+					index = i;
+				}
+			}
+			sortedArr.add(temp.get(index));
+			temp.remove(index);
+		}
+		
+		return sortedArr;
+	}
+	//add grade
+	public static void addGrade(int gradeOption, ArrayList<AssignmentInterface> assignIntArr, double score, char letter, String name, LocalDate dueLocalDate, String concept, String reading, int numQuestions) {
+		switch(gradeOption) {				//creates respective assignment type
+		case 1:
+			assignIntArr.add(new Quiz(score, letter, name, dueLocalDate, numQuestions));
+			break;
+		case 2:
+			assignIntArr.add(new Program(score, letter, name, dueLocalDate, concept));
+			break;
+		case 3:
+			assignIntArr.add(new Discussion(score, letter, name, dueLocalDate, reading));
+			break;
+		}
+	}
+	//remove grade
+	public static boolean removeGrade(String nameoption, ArrayList<AssignmentInterface> assignIntArr) {
+		for(int i = 0; i < assignIntArr.size(); i++) {			//finds and remove given assignment
+			if((assignIntArr.get(i).getName()).equals(nameoption)) {
+				assignIntArr.remove(i);
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public static int currElements = 0;
+	public static Scanner in = new Scanner(System.in);
 	
 	//main
 	public static void main(String[] args) throws GradebookEmptyException, InvalidGradeException, GradebookFullException {
-		Scanner in = new Scanner(System.in);
-		int gradebookSize = -1;
 		int menuOption = -1;
-		int currElements = 0;
 		boolean quit = false;
 		/*
 		 * Initializing AssignmentInterface array:
@@ -174,12 +302,10 @@ public class Gradebook {
 		 */
 		System.out.println("Welcome to the Gradebook!\n"
 				+ "===================================\n");
-		System.out.println("please enter the desired gradebook size:"
-				+ "\t\t\t(Between 1 & 20)");
 		
-		gradebookSize = checkInteger(in, 20, 1, gradebookSize);
+		//AssignmentInterface[] assignIntArr = new AssignmentInterface[gradebookSize];
 		
-		AssignmentInterface[] assignIntArr = new AssignmentInterface[gradebookSize];
+		ArrayList<AssignmentInterface> assignIntArr = new ArrayList<>();
 		
 		/*
 		 * Prompt user w/ menu containing different options:
@@ -204,10 +330,15 @@ public class Gradebook {
 					+ "(6) Print Quiz Question Average\n"
 					+ "(7) Print Discussions/Associated Readings\n"
 					+ "(8) Print Program Concepts\n"
-					+ "(9) Quit\n");
-			System.out.println("Enter a choice:\t\t\t(Between 1 & 9)");
+					+ "(9) Print to File\n"
+					+ "(10) Read from File\n"
+					+ "(11) To MySQL\n"
+					+ "(12) From MySQL\n"
+					+ "(13) MySQL Search\n"
+					+ "(14) Quit\n");
+			System.out.println("Enter a choice:\t\t\t(Between 1 & 14)");
 			
-			menuOption = checkInteger(in, 9, 1, menuOption);
+			menuOption = checkInteger(in, 14, 1, menuOption);
 			System.out.println("----------------------");
 			
 			switch(menuOption) {
@@ -217,17 +348,6 @@ public class Gradebook {
 				 * if there are already too many grades an exception will be thrown
 				 */
 				case 1:
-					try {
-						if(currElements == gradebookSize) {		//checks if gradebook is full
-							throw new GradebookFullException();
-						}
-					}
-					catch(GradebookFullException e) {
-						System.out.println("the gradebook is already full...\t\tno more adding for now!");
-						System.out.println("--------------------------------------------------");
-						break;
-					}
-					
 					int gradeOption = -1;
 					double score = -1;
 					String letterInput = "1";
@@ -271,23 +391,20 @@ public class Gradebook {
 						}
 					}
 					
-					switch(gradeOption) {				//creates respective assignment type
-						case 1:
-							System.out.println("\nNUMBER OF QUESTIONS:");
-							numQuestions = checkInteger(in, 0, numQuestions);
-							assignIntArr[findEmptySlot(assignIntArr)] = new Quiz(score, letter, name, dueLocalDate, numQuestions);
-							break;
-						case 2:
-							System.out.println("\nCONCEPT:");
-							concept = in.next();
-							assignIntArr[findEmptySlot(assignIntArr)] = new Program(score, letter, name, dueLocalDate, concept);
-							break;
-						case 3:
-							System.out.println("\nASSOCIATED READING:");
-							reading = in.next();
-							assignIntArr[findEmptySlot(assignIntArr)] = new Discussion(score, letter, name, dueLocalDate, reading);
-							break;
+					if(gradeOption == 1) {
+						System.out.println("\nNUMBER OF QUESTIONS:");
+						numQuestions = checkInteger(in, 1, numQuestions);
 					}
+					else if(gradeOption == 2) {
+						System.out.println("\nCONCEPT:");
+						concept = in.next();
+					}
+					else if(gradeOption == 3) {
+						System.out.println("\nASSOCIATED READING:");
+						reading = in.next();
+					}
+					
+					addGrade(gradeOption, assignIntArr, score, letter, name, dueLocalDate, concept, reading, numQuestions);
 					
 					currElements++;
 					System.out.println("--------------------------------------------------");
@@ -310,51 +427,33 @@ public class Gradebook {
 						break;
 					}
 					
+					System.out.println("Remove Grades:\n"
+							+ "--------------");
+					
 					int gradeOption2 = -1;
 					boolean quit2 = false;
 					while(!quit2) {
-						System.out.println("Remove Grades:\n"
-								+ "--------------\n"
-								+ "\nwhat type of grade would you like to remove?\n"
-								+ "(1) Quiz\n"
-								+ "(2) Program\n"
-								+ "(3) Discussion\n");
+						System.out.println("\nwhat is the name of the grade you would like to remove?");
 						
-						gradeOption2 = checkInteger(in, 3, 1, gradeOption2);
+						String nameoption = in.next();
 						
-						for(int i = 0; i < gradebookSize; i++) {			//finds and remove given assignment
-							switch(gradeOption2) {
-								case 1:
-									if(assignIntArr[i] instanceof Quiz) {
-										assignIntArr[i] = null;
-										quit2 = true;
-									}
-									break;
-								case 2:
-									if(assignIntArr[i] instanceof Program) {
-										assignIntArr[i] = null;
-										quit2 = true;
-									}
-									break;
-								case 3:
-									if(assignIntArr[i] instanceof Discussion) {
-										assignIntArr[i] = null;
-										quit2 = true;
-									}
-									break;
-							}
-						}
+						quit2 = removeGrade(nameoption, assignIntArr);
+						
 						try {
 							if(quit2 == false) {
 								throw new InvalidGradeException();			//checks if assignment even exists
 							}
 						}
 						catch(InvalidGradeException e) {
-							System.out.println("\nthe grade you are trying to remove does not exist...\t\ttry again!\n");
+							System.out.println("\nthe grade you are trying to remove does not exist...\t\ttry again!");
+							break;
 						}
 					}
-					System.out.println("\ngrade removed...");
-					currElements--;
+						
+					if(quit2 == true) {
+						System.out.println("\ngrade removed...");
+						currElements--;
+					}
 					System.out.println("--------------------------------------------------");
 					break;
 				/*
@@ -374,13 +473,45 @@ public class Gradebook {
 						break;
 					}
 					
+					int printOption = -1;
+					
+					System.out.println("Print Grades:\n"
+							+ "--------------\n"
+							+ "\nhow would you like to sort the grades?\n"
+							+ "(1) Score\n"
+							+ "(2) Letter\n"
+							+ "(3) Alphabetical Name\n"
+							+ "(4) Due Date\n"
+							+ "(5) Print Normally\n");
+					
+					printOption = checkInteger(in, 5, 1, printOption);
+					
 					int gradebookEntry = 1;
 					
-					for(int i = 0; i < assignIntArr.length; i++) {
-						if(assignIntArr[i] != null) {
+					ArrayList<AssignmentInterface> sortedArr = new ArrayList<>();
+					
+					switch(printOption) {
+					case 1:
+						sortedArr = sortByScore(assignIntArr);
+						break;
+					case 2:
+						sortedArr = sortByLetter(assignIntArr);
+						break;
+					case 3:
+						sortedArr = sortByAlph(assignIntArr);
+						break;
+					case 4:
+						sortedArr = sortByDate(assignIntArr);
+						break;
+					case 5:
+						sortedArr = (ArrayList<AssignmentInterface>) assignIntArr.clone();
+					}
+					
+					for(int i = 0; i < sortedArr.size(); i++) {
+						if(sortedArr.get(i) != null) {
 							System.out.println("\nGradebook Entry #" + gradebookEntry			//prints all gradebook entries
 									+ "\n----------------------------");
-							System.out.println(assignIntArr[i].toString());
+							System.out.println(sortedArr.get(i).toString());
 							System.out.println("\n");
 							gradebookEntry++;
 						}
@@ -406,9 +537,9 @@ public class Gradebook {
 					}
 					
 					double avg = 0;
-					for(int i = 0; i < assignIntArr.length; i++) {			//prints average score
-						if(assignIntArr[i] != null) {
-							avg += assignIntArr[i].getScore();
+					for(int i = 0; i < assignIntArr.size(); i++) {			//prints average score
+						if(assignIntArr.get(i) != null) {
+							avg += assignIntArr.get(i).getScore();
 						}
 					}
 					avg = avg/currElements;
@@ -437,26 +568,26 @@ public class Gradebook {
 					double highScore = 0;
 					int count = 0;
 					if(currElements == 1) {
-						for(int i = 0; i < assignIntArr.length; i++) {			//sets high/low score the same if theres only 1 element
-							if(assignIntArr[i] != null) {
-								lowScore = assignIntArr[i].getScore();
+						for(int i = 0; i < assignIntArr.size(); i++) {			//sets high/low score the same if theres only 1 element
+							if(assignIntArr.get(i) != null) {
+								lowScore = assignIntArr.get(i).getScore();
 								highScore = lowScore;
 							}
 						}
 					}
 					else {
-						for(int i = 0; i < assignIntArr.length; i++) {
-							if(assignIntArr[i] != null && count == 0) {
-								lowScore = assignIntArr[i].getScore();				//finds high/low score otherwise
+						for(int i = 0; i < assignIntArr.size(); i++) {
+							if(assignIntArr.get(i) != null && count == 0) {
+								lowScore = assignIntArr.get(i).getScore();				//finds high/low score otherwise
 								highScore = lowScore;
 								count++;
 							}
-							else if(assignIntArr[i] != null) {
-								if(assignIntArr[i].getScore() > highScore) {
-									highScore = assignIntArr[i].getScore();
+							else if(assignIntArr.get(i) != null) {
+								if(assignIntArr.get(i).getScore() > highScore) {
+									highScore = assignIntArr.get(i).getScore();
 								}
-								if(assignIntArr[i].getScore() < lowScore) {
-									lowScore = assignIntArr[i].getScore();
+								if(assignIntArr.get(i).getScore() < lowScore) {
+									lowScore = assignIntArr.get(i).getScore();
 								}
 							}
 						}
@@ -486,12 +617,14 @@ public class Gradebook {
 					
 					double numQuestionAvg = 0;
 					int count4 = 0;
-					for(int i = 0; i < assignIntArr.length; i++) {
-						if(assignIntArr[i] instanceof Quiz) {					//gets average question number
-							numQuestionAvg += ((Quiz) assignIntArr[i]).getNumQuestions();
+					for(int i = 0; i < assignIntArr.size(); i++) {
+						if(assignIntArr.get(i) instanceof Quiz) {					//gets average question number
+							numQuestionAvg += ((Quiz) assignIntArr.get(i)).getNumQuestions();
 							count4++;
 						}
 					}
+					
+					numQuestionAvg /= count4;
 					
 					if(count4 == 0 && currElements > 0) {
 						System.out.println("there are no quizzes in the gradebook...");
@@ -518,10 +651,10 @@ public class Gradebook {
 					}
 					
 					int count2 = 0;
-					for(int i = 0; i < assignIntArr.length; i++) {
-						if(assignIntArr[i] instanceof Discussion) {
+					for(int i = 0; i < assignIntArr.size(); i++) {
+						if(assignIntArr.get(i) instanceof Discussion) {
 							System.out.println("\nAssociated Reading #" + (count2+1));					//prints all discussion readings
-							System.out.println("\"" + ((Discussion) assignIntArr[i]).getReading() + "\"");
+							System.out.println("\"" + ((Discussion) assignIntArr.get(i)).getReading() + "\"");
 							System.out.println("\n");
 							count2++;
 						}
@@ -550,10 +683,10 @@ public class Gradebook {
 					}
 					
 					int count3 = 0;
-					for(int i = 0; i < assignIntArr.length; i++) {
-						if(assignIntArr[i] instanceof Program) {
+					for(int i = 0; i < assignIntArr.size(); i++) {
+						if(assignIntArr.get(i) instanceof Program) {
 							System.out.println("\nConcept #" + (count3+1));
-							System.out.println("\"" + ((Program) assignIntArr[i]).getConcept() + "\"");			//prints all concepts
+							System.out.println("\"" + ((Program) assignIntArr.get(i)).getConcept() + "\"");			//prints all concepts
 							System.out.println("\n");
 							count3++;
 						}
@@ -564,16 +697,79 @@ public class Gradebook {
 					}
 					System.out.println("--------------------------------------------------");
 					break;
+				case 9:
+					try {
+						if(currElements == 0) {
+							throw new GradebookEmptyException();			//checks if gradebook is empty
+						}
+					}
+					catch(GradebookEmptyException e) {
+						System.out.println("the gradebook is empty...\t\tnothing to write for now!");
+						System.out.println("--------------------------------------------------");
+						break;
+					}
+					
+					if(!(GradebookIO.saveGradebook(assignIntArr))) {
+						System.out.println("the gradebook did not write to file properly...\t\ttry again");
+					}
+					else {
+						System.out.println("\nsuccesfully printed to file!");
+					}
+					
+					System.out.println("--------------------------------------------------");
+					break;
+				case 10:
+					if(GradebookIO.addFromFile(in, assignIntArr)) {
+						System.out.println("\nsuccesfully added grades!");
+					}
+					System.out.println("--------------------------------------------------");
+					break;
+				case 11:
+					try {
+						if(currElements == 0) {
+							throw new GradebookEmptyException();			//checks if gradebook is empty
+						}
+					}
+					catch(GradebookEmptyException e) {
+						System.out.println("the gradebook is empty...\t\tnothing to add for now!");
+						System.out.println("--------------------------------------------------");
+						break;
+					}
+					
+					if(GradebookDB.toMySQL(assignIntArr)) {
+						System.out.println("\nsuccesfully converted to MySQL!\n");
+					}
+					else {
+						System.out.println("\nfailed to convert to MySQL...\t\ttry again");
+					}
+					System.out.println("--------------------------------------------------");
+					break;
+				case 12:
+					if(GradebookDB.fromMySQL(assignIntArr)) {
+						System.out.println("\nsuccesfully converted to MySQL!\n");
+					}
+					else {
+						System.out.println("\nfailed to convert to MySQL...\t\ttry again");
+					}
+					System.out.println("--------------------------------------------------");
+					break;
+				case 13:
+					if(!GradebookDB.searchSQL(in)) {
+						System.out.println("\nfailed to search MySQL...\t\ttry again");
+					}
+					System.out.println("--------------------------------------------------");
+					break;
 				/*
 				 * Quits program
 				 */
-				case 9:
+				case 14:
 					quit = true;			//quits program
 					System.out.println("LEAVING GRADEBOOK...");
 					break;
 			}
 		}
 		
+		DBUtil.closeConnection();
 		in.close();
 	}
 
