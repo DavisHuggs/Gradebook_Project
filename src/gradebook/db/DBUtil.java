@@ -30,8 +30,9 @@ public class DBUtil {
     	  
         // set the db url, username, and password
         System.out.println("\ntrying a connection!");
-        String url = "jdbc:mysql://myawsdb.cno2zewghfii.us-east-1.rds.amazonaws.com";
-
+        String url = "jdbc:mysql://showcreatedb.c9esppznu5gk.us-east-1.rds.amazonaws.com/mydatabase";
+        
+        //jdbc:mysql://myawsdb.cno2zewghfii.us-east-1.rds.amazonaws.com
         // get and return connection
 
         Class.forName("com.mysql.cj.jdbc.Driver");

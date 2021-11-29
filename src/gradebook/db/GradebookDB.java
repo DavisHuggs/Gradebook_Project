@@ -19,6 +19,32 @@ import gradebook.ui.Gradebook;
 public class GradebookDB {
 	private static Connection connection = DBUtil.getConnection(Gradebook.in);
 	
+	public static boolean createTable() throws SQLException {
+		if(connection == null) {
+			connection = DBUtil.getConnection(Gradebook.in);
+		}
+		
+	    String sqlCreate = ("CREATE TABLE IF NOT EXISTS Gradebook"
+	            + "("
+	            + "	assignmenttype	VARCHAR(20),"
+	            + "	score	INT,"
+	            + "	letter	VARCHAR(1),"
+	            + "	name	VARCHAR(100),"
+	            + "	date	VARCHAR(10),"
+	            + "	uniquevariable	VARCHAR(100)"
+	            + ");");
+	    
+	    try(Statement stmt = connection.createStatement()){
+	    	stmt.execute(sqlCreate);
+	    }
+	    catch(SQLException | NullPointerException e) {
+		    System.out.println(e);
+		    return false;
+	    }
+	    
+	    return true;
+	}
+	
 	public static boolean toMySQL(ArrayList<AssignmentInterface> assignIntArr) {
 		if(connection == null) {
 			connection = DBUtil.getConnection(Gradebook.in);

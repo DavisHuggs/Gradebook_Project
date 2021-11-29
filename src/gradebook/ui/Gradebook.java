@@ -736,6 +736,17 @@ public class Gradebook {
 						break;
 					}
 					
+					try {
+						if(GradebookDB.createTable() == false) {
+							System.out.println("\nfailed to convert to MySQL...\t\ttry again");
+							break;
+						}
+					} catch (SQLException e) {
+						System.out.println("\nfailed to convert to MySQL...\t\ttry again");
+						e.printStackTrace();
+						break;
+					}
+					
 					if(GradebookDB.toMySQL(assignIntArr)) {
 						System.out.println("\nsuccesfully converted to MySQL!\n");
 					}
@@ -745,6 +756,17 @@ public class Gradebook {
 					System.out.println("--------------------------------------------------");
 					break;
 				case 12:
+					try {
+						if(GradebookDB.createTable() == false) {
+							System.out.println("\nfailed to convert to MySQL...\t\ttry again");
+							break;
+						}
+					} catch (SQLException e) {
+						System.out.println("\nfailed to convert to MySQL...\t\ttry again");
+						e.printStackTrace();
+						break;
+					}
+					
 					if(GradebookDB.fromMySQL(assignIntArr)) {
 						System.out.println("\nsuccesfully converted to MySQL!\n");
 					}
@@ -754,6 +776,17 @@ public class Gradebook {
 					System.out.println("--------------------------------------------------");
 					break;
 				case 13:
+					try {
+						if(GradebookDB.createTable() == false) {
+							System.out.println("\nfailed to convert to MySQL...\t\ttry again");
+							break;
+						}
+					} catch (SQLException e) {
+						System.out.println("\nfailed to convert to MySQL...\t\ttry again");
+						e.printStackTrace();
+						break;
+					}
+					
 					if(!GradebookDB.searchSQL(in)) {
 						System.out.println("\nfailed to search MySQL...\t\ttry again");
 					}
