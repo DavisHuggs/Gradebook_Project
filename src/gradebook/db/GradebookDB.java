@@ -14,7 +14,7 @@ import gradebook.assignment.AssignmentInterface;
 import gradebook.assignment.Discussion;
 import gradebook.assignment.Program;
 import gradebook.assignment.Quiz;
-import gradebook.ui.Gradebook;
+import gradebook.ui.*;
 
 public class GradebookDB {
 	private static Connection connection = DBUtil.getConnection(Gradebook.in);
@@ -184,7 +184,7 @@ public class GradebookDB {
 				+ "(5) All Grades\t\t(within date range)\n"
 				+ "(6) All Grades\t\t(only even)\n");
 		
-		sqlOption = Gradebook.checkInteger(in, 6, 1, sqlOption);
+		sqlOption = GradebookHelper.checkInteger(in, 6, 1, sqlOption);
 		
 		switch(sqlOption) {
 		case 1:
@@ -258,10 +258,10 @@ public class GradebookDB {
 			double max = -1;
 			
 			System.out.println("what is the minimum of the score range you would like?");
-			min = Gradebook.checkDouble(in, 0, min);
+			min = GradebookHelper.checkDouble(in, 0, min);
 			
 			System.out.println("what is the maximum of the score range you would like?");
-			max = Gradebook.checkDouble(in, 0, max);
+			max = GradebookHelper.checkDouble(in, 0, max);
 			
 			String getAll = "SELECT * FROM Gradebook";
 	

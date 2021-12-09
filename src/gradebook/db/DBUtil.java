@@ -42,9 +42,9 @@ public class DBUtil {
       } catch (SQLException | ClassNotFoundException e) {
     	  System.out.println("\ncould not connect to MySQL databse...\t\ttry again\n");
     	  didntWork = true;
+    	  return null;
       }
     }
-	return connection;
   }
 
   public static synchronized void closeConnection(){

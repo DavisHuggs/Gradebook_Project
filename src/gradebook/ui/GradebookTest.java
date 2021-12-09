@@ -23,7 +23,7 @@ public class GradebookTest {
 	//test created grade
 	@Test
 	public void testAddGrade() {
-		Gradebook.addGrade(1, assignIntArr, 100, 'a', "davis", LocalDate.parse("1212-12-12"), "school", "work", 20);
+		Gradebook.addGradeTest(1, assignIntArr, 100, 'a', "davis", LocalDate.parse("1212-12-12"), "school", "work", 20);
 		Assertions.assertEquals(assignIntArr.size(), 4);
 	}
 	
@@ -39,7 +39,7 @@ public class GradebookTest {
 		String reading = "work";
 		boolean theSame = false;
 		
-		Gradebook.addGrade(gradeOption, assignIntArr, score, letter, name, date, concept, reading, 20);
+		Gradebook.addGradeTest(gradeOption, assignIntArr, score, letter, name, date, concept, reading, 20);
 		
 		int size = assignIntArr.size() - 1;
 		
@@ -57,7 +57,7 @@ public class GradebookTest {
 	
 	@Test
 	public void testRemoveGrade() {
-		Gradebook.removeGrade("davis", assignIntArr);
+		Gradebook.removeGradeTest("davis", assignIntArr);
 		boolean isCorrect = false;
 		
 		if(assignIntArr.get(0).getAssignmentType().equals("Program") &&
